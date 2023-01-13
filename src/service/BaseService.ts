@@ -1,11 +1,14 @@
-import { BaseEntity, FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import { BaseEntity, DataSource, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from "typeorm";
 import SendEvent from "../util/Event";
 
 interface Service<T extends BaseEntity> {
     find(options : FindManyOptions <T>) : Promise<T[]>;
+    findBy(params : FindOptionsWhere<T> | FindOptionsWhere<T>) : Promise<T[]>
+    findOne(options?: FindOneOptions<T>) : Promise<T>
+    findOneBy(params : FindOptionsWhere<T> | FindOptionsWhere<T>) : Promise<T>
 }
 
-export abstract class BaseService<T extends BaseEntity> implements Service<T> {
+export default abstract class BaseService<T extends BaseEntity> implements Service<T> {
     public repository : Repository<T>;
     private nameTable : string;
 
@@ -15,7 +18,7 @@ export abstract class BaseService<T extends BaseEntity> implements Service<T> {
         return this.nameTable;
     }
 
-    async find(options: FindManyOptions<T>) {
+    async find(options?: FindManyOptions<T>) {
         SendEvent(`Starting search for ${this.name} in database!`, options, 'info');
 
         const models = this.repository.find(options);
@@ -31,7 +34,7 @@ export abstract class BaseService<T extends BaseEntity> implements Service<T> {
         return models;
     }
 
-    async findOne(options: FindOneOptions<T>) {
+    async findOne(options?: FindOneOptions<T>) {
         SendEvent(`Starting search for one ${this.name} in database!`, {}, 'info');
 
         const models = this.repository.findOne(options);
@@ -47,7 +50,7 @@ export abstract class BaseService<T extends BaseEntity> implements Service<T> {
         return models;
     }
 
-    async findBy(params : {}){
+    async findBy(params : FindOptionsWhere<T> | FindOptionsWhere<T>){
         SendEvent(`Starting search by params for ${this.name} in database!`, params, 'info');
 
         const models = this.repository.findBy(params);
@@ -63,7 +66,7 @@ export abstract class BaseService<T extends BaseEntity> implements Service<T> {
         return models;
     }
 
-    async findOneBy(params : {}){
+    async findOneBy(params : FindOptionsWhere<T> | FindOptionsWhere<T>){
         SendEvent(`Starting search by params for one ${this.name} in database!`, params, 'info');
 
         const models = this.repository.findOneBy(params);
@@ -78,9 +81,4 @@ export abstract class BaseService<T extends BaseEntity> implements Service<T> {
 
         return models;
     }
-
-    async findById(id:any) {
-        return this.findOneBy({id: id});
-    }
-
 }
