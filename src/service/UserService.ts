@@ -1,12 +1,11 @@
-import { DataSource } from "typeorm";
-import { AppDataSource } from "../database/data-source";
+import { GetRepository } from "../database/data-source";
 import { User } from "../model/User";
 import BaseService from "./BaseService";
 
 export default class UserService extends BaseService<User> {
-    constructor(dataSource : DataSource = AppDataSource){
+    constructor(){
         super();
-        this.repository = dataSource.getRepository(User);
+        this.repository = GetRepository(User);
     }
 
     async findById(id:any) {
