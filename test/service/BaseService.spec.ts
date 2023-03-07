@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { BaseEntity, Column, DataSource, Entity, LessThan, PrimaryGeneratedColumn } from 'typeorm';
+import { DestroyDataSource, GetRepository } from '../../src/database/data-source';
 import BaseService from '../../src/service/BaseService';
 import SendEvent from '../../src/util/Event';
 import { makeInMemoryDatabase } from '../Util';
@@ -18,32 +19,29 @@ class MockModel extends BaseEntity {
 }
 
 class MockService extends BaseService<MockModel> {
-    constructor(dataSource : DataSource){
+    constructor(){
         super();
-        this.repository = dataSource.getRepository(MockModel);
+        this.repository = GetRepository(MockModel);
     }
 }
 
-describe('User Service', () => {
+describe('Mock Service', () => {
     let mockService : MockService, dataSource : DataSource;
   
     beforeAll( async () => {
-      dataSource = await makeInMemoryDatabase([MockModel]);
-      mockService = new MockService(dataSource);
+      await makeInMemoryDatabase([MockModel]);
+      mockService = new MockService();
   
       let model = new MockModel();
       model.id = 1;
       model.age = 19;
       model.firstName = "Jonh";
   
-      if(dataSource.isInitialized){
-        dataSource.getRepository(MockModel).insert(model);
-  
-      }
+      GetRepository(MockModel).insert(model);
     });
   
     afterAll(() => {
-      return dataSource.destroy();
+      return DestroyDataSource();
     });
   
     test('Should return an array with all models in database', async () => {
