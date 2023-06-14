@@ -1,4 +1,4 @@
-import { BaseEntity, DataSource, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from "typeorm";
+import { BaseEntity, DataSource, Entity, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from "typeorm";
 import SendEvent from "../util/Event";
 
 interface Service<T extends BaseEntity> {
@@ -80,5 +80,22 @@ export default abstract class BaseService<T extends BaseEntity> implements Servi
         });
 
         return models;
+    }
+
+    async exist(options?: FindOneOptions<T>) : Promise<boolean> {
+        SendEvent(`Starting search for one ${this.name} in database!`, {}, 'info');
+
+        const existEntity = this.repository.exist(options);
+
+        existEntity.then(result => {
+            if(result)
+                SendEvent(`Search for one ${this.name} completed successfully!`, options);
+            else
+                SendEvent(`Has no ${this.name} in database!`, options, 'warn');
+        }).catch((error) => {
+            SendEvent(`Search for ${this.name} has a error!`, error, 'error');
+        });
+
+        return existEntity;
     }
 }
