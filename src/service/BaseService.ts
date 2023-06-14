@@ -98,4 +98,21 @@ export default abstract class BaseService<T extends BaseEntity> implements Servi
 
         return existEntity;
     }
+
+    async save(entity : T){
+        SendEvent(`Starting saving a new ${this.name} in database!`, entity, 'info');
+
+        const savedResult = this.repository.save(entity)
+
+        savedResult.then(result => {
+            if(result.hasId)
+                SendEvent(`A new entity was saved in ${this.name} with successfully!`, entity);
+            else
+                SendEvent(`The entity was not saved in database!`, entity, 'warn');
+        }).catch((error) => {
+            SendEvent(`The entity ${entity} has a error!`, error, 'error');
+        });
+
+        return savedResult;
+    }
 }
